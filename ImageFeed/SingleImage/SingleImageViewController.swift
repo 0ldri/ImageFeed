@@ -17,7 +17,7 @@ final class SingleImageViewController: UIViewController, UIScrollViewDelegate {
     
     @IBOutlet private var scrollView: UIScrollView!
     
-    @IBAction func didTapShareButton(_ sender: UIButton) {
+    @IBAction private func didTapShareButton(_ sender: UIButton) {
         guard let image else { return }
         let share = UIActivityViewController(
             activityItems: [image],
@@ -49,7 +49,7 @@ final class SingleImageViewController: UIViewController, UIScrollViewDelegate {
     // MARK: - Setup Methods
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
+        imageView
     }
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {

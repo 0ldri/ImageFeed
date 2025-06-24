@@ -7,7 +7,7 @@ final class ProfileViewController: UIViewController {
     private let avatarImage: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(named: "Avatar")
+        imageView.image = UIImage(resource: .avatar)
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -42,7 +42,7 @@ final class ProfileViewController: UIViewController {
     private let logoutButton: UIButton = {
         let button = UIButton (type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        let image = UIImage(named: "ExitButton")
+        let image = UIImage(resource: .exitButton)
         button.tintColor = .ypRed
         button.setImage(image, for: .normal)
         return button
