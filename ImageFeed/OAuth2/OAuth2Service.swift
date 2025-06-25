@@ -2,6 +2,11 @@ import Foundation
 
 final class OAuth2Service {
     
+    // MARK: - Singleton
+    
+    static let shared = OAuth2Service()
+    private init() {}
+    
     // MARK: - Properties
     
     private let session = URLSession.shared
@@ -10,7 +15,7 @@ final class OAuth2Service {
     
     // MARK: - API
     
-    func makeOAuthTokenRequest(code: String) -> URLRequest? {
+    private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard let baseURL = URL(string: "https://unsplash.com") else {
             return nil
         }
@@ -72,7 +77,7 @@ final class OAuth2Service {
             switch networkError {
             case .httpStatusCode(let code):
                 print("Unsplash API error. Status code: \(code)")
-            case .urlRequestError(let error):
+            case .urlRequestError:
                 print("URLRequest error")
             case .urlSessionError:
                 print("URLSession error")

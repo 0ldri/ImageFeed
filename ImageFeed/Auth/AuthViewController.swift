@@ -9,7 +9,7 @@ final class AuthViewController: UIViewController {
     
     private let showWebViewSegueIdentifier = "ShowWebView"
     weak var delegate: AuthViewControllerDelegate?
-    private let oauthService = OAuth2Service()
+    private let oauthService = OAuth2Service.shared
     
     // MARK: - Lifecycle
     
@@ -41,31 +41,21 @@ final class AuthViewController: UIViewController {
             navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
             navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
             navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-            navigationItem.backBarButtonItem?.tintColor = UIColor(named: "ypBlack")
+            navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
         }
 }
 
     // MARK: - WebViewViewControllerDelegate
 
-    extension AuthViewController: WebViewViewControllerDelegate {
-        func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-            vc.dismiss(animated: true)
-        
-            oauthService.fetchOAuthToken(code) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success:
-                        print("Token received")
-                        self?.delegate?.authViewController(self!, didAuthenticateWithCode: code)
-                    case .failure:
-                        print("Token doesnt received")
-                }
-            }
+extension AuthViewController: WebViewViewControllerDelegate {
+    func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        vc.dismiss(animated: true) {
+            self.delegate?.authViewController(self, didAuthenticateWithCode: code)
         }
     }
-
-        func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-            vc.dismiss(animated: true)
+    
+    func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
+        vc.dismiss(animated: true)
     }
 }
 
