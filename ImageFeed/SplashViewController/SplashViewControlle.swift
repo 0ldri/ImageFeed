@@ -5,8 +5,7 @@ final class SplashViewController: UIViewController {
     
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
-    private var isFethcingToken = false
-    
+
     //MARK: - Lifecycle
     
     override func viewDidAppear(_ animated: Bool) {
