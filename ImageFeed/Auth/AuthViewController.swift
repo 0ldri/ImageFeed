@@ -47,11 +47,11 @@ final class AuthViewController: UIViewController {
     
     private func showLoginErrorAlert() {
         let alert = UIAlertController(
-            title: "Что-то пошло не так",
-            message: "Не удалось войти в систему",
+            title: Constants.title,
+            message: Constants.message,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Ок", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: Constants.okButton, style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
 }
@@ -64,7 +64,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
         {
             UIBlockingProgressHUD.show()
             self.oauthService.fetchOAuthToken(code) { [weak self] result in
-                guard let self = self else { return }
+                guard let self else { return }
                 UIBlockingProgressHUD.dismiss()
                 
                 switch result {

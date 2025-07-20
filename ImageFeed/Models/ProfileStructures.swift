@@ -1,4 +1,4 @@
-struct ProfileResult: Codable {
+struct ProfileResult: Decodable {
     let userLogin: String
     let firstName: String
     let lastName: String

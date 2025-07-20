@@ -32,7 +32,7 @@ final class OAuth2Service {
             }
             
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = HTTPMethod.post.rawValue
         return request
     }
     

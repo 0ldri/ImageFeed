@@ -44,7 +44,7 @@ final class ProfileService {
     private func makeFetchProfileRequest() -> URLRequest? {
         URLRequest.makeHTTPRequest(
             path: "/me",
-            httpMethod: "GET",
+            httpMethod: .get,
             baseURLString: Constants.defaultApiBaseURLString
             )
     }

@@ -7,7 +7,12 @@ enum Constants {
     static let secretKey = "Ss47PMMK65z27O3z5PQzfJ881HvTvH1TeMm4P_N2Jw8"
     static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
     static let accessScope = "public+read_user+write_likes"
-    static let defaultBaseURL = URL(string: "https://api.unsplash.com")!
+    static let defaultBaseURL: URL = {
+        guard let url = URL(string: "https://api.unsplash.com") else {
+            fatalError("Failed to create defaultBaseURL")
+        }
+        return url
+    }()
     
     //MARK: - Unspalsh api base path
     
@@ -19,4 +24,11 @@ enum Constants {
     //MARK: - Storage
     
     static let bearerToken = "bearerToken"
+    
+    //MARK: - Login Error Alert
+    
+    static let title = "Что-то пошло не так"
+    static let message = "Не удалось войти в систему"
+    static let okButton = "Ок"
 }
+

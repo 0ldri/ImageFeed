@@ -6,7 +6,7 @@ final class ProfileImageService {
     
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     
-    private (set) var avatarURL: String?
+    private(set) var avatarURL: String?
     private var task: URLSessionTask?
     
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
@@ -52,7 +52,7 @@ final class ProfileImageService {
     private func makeImageRequest(username: String) -> URLRequest? {
         URLRequest.makeHTTPRequest(
             path: "/users/\(username)",
-            httpMethod: "GET",
+            httpMethod: .get,
             baseURLString: Constants.defaultApiBaseURLString
             )
     }
