@@ -1,4 +1,5 @@
 import UIKit
+import ProgressHUD
 
 protocol AuthViewControllerDelegate: AnyObject {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String)
@@ -43,14 +44,36 @@ final class AuthViewController: UIViewController {
             navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
             navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
         }
+    
+    private func showLoginErrorAlert() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Ок", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
     // MARK: - WebViewViewControllerDelegate
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.dismiss(animated: true) {
-            self.delegate?.authViewController(self, didAuthenticateWithCode: code)
+        vc.dismiss(animated: true)
+        {
+            UIBlockingProgressHUD.show()
+            self.oauthService.fetchOAuthToken(code) { [weak self] result in
+                guard let self = self else { return }
+                UIBlockingProgressHUD.dismiss()
+                
+                switch result {
+                case .success:
+                    self.delegate?.authViewController(self, didAuthenticateWithCode: code)
+                case .failure:
+                    self.showLoginErrorAlert()
+                }
+            }
         }
     }
     
@@ -58,4 +81,3 @@ extension AuthViewController: WebViewViewControllerDelegate {
         vc.dismiss(animated: true)
     }
 }
-

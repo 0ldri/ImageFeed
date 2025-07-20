@@ -1,9 +1,10 @@
 import Foundation
+import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
     
     static let shared = OAuth2TokenStorage()
-    private let userDefaults = UserDefaults.standard
+    private let keychain = KeychainWrapper.standard
     private let key = "UnsplashOAuthToken"
     
     var token: String? {
@@ -22,18 +23,24 @@ final class OAuth2TokenStorage {
     // MARK: - Private Methods
     
     private func getToken() -> String? {
-        userDefaults.string(forKey: key)
+        return keychain.string(forKey: key)
     }
     
     private func saveToken(_ token: String) {
-        userDefaults.set(token, forKey: key)
-        print("Token saved")
+        let isSuccess = keychain.set(token, forKey: key)
+        if isSuccess {
+            print("Token saved in Keychain")
+        } else {
+            print("Failed to save token in Keychain")
+        }
     }
     
     private func removeToken() {
-        userDefaults.removeObject(forKey: key)
-        print("Token removed")
+        let isRemoved = keychain.removeObject(forKey: key)
+        if isRemoved {
+            print("Token removed from Keychain")
+        } else {
+            print("Failed to remove token from Keychain")
+        }
     }
 }
-    
-
