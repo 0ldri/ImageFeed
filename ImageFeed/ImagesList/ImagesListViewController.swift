@@ -94,6 +94,10 @@ extension ImagesListViewController: UITableViewDataSource {
         }
 
         configCell(for: cell, with: indexPath)
+//        let photos = ImagesListService.shared.photos
+//        if indexPath.row == photos.count - 1 {
+//            ImagesListService.shared.fetchPhotosNextPage()
+//        }
         return cell
     }
 }
