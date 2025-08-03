@@ -13,8 +13,11 @@ final class ImagesListService {
     
     private let perPage = 10
     private let session = URLSession.shared
-    private let baseURL = "https://unsplash.com/"
+    private let baseURL = "https://api.unsplash.com/"
     
+    func reset() {
+        photos = []
+    }
     
     func fetchPhotosNextPage(completion: ((Result<[Photo], Error>) -> Void)? = nil) {
         guard !isFetching else { return }
@@ -63,5 +66,59 @@ final class ImagesListService {
         } else {
             print("Unknow error")
         }
+    }
+    func changeLike(id: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        guard let token = OAuth2TokenStorage.shared.token else {
+            completion(.failure(NetworkError.tokenMissing))
+            return
+        }
+        
+        let method: HTTPMethod = isLike ? .post : .delete
+        let path = "photos/\(id)/like"
+        
+        guard let request = URLRequest.makeHTTPRequest(
+            path: path,
+            httpMethod: method,
+            baseURLString: baseURL,
+        ) else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        task?.cancel()
+        
+        task = session.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(NetworkError.urlRequestError(error)))
+                    return
+                }
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(NetworkError.urlSessionError))
+                    return
+                }
+                if (200...299).contains(httpResponse.statusCode) {
+                    if let index = self?.photos.firstIndex(where: { $0.id == id }) {
+                        var photo = self!.photos[index]
+                        let updatePhoto = Photo(
+                            id: photo.id,
+                            size: photo.size,
+                            createdAt: photo.createdAt,
+                            welcomeDescription: photo.welcomeDescription,
+                            thumbImageURL: photo.thumbImageURL,
+                            largeImageURL: photo.largeImageURL,
+                            isLiked: isLike
+                        )
+                        self?.photos[index] = updatePhoto
+                        NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self)
+                    }
+                    completion(.success(()))
+                } else {
+                    completion(.failure(NetworkError.httpStatusCode(httpResponse.statusCode)))
+                }
+            }
+        }
+        task?.resume()
     }
 }

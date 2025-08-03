@@ -1,3 +1,4 @@
+
 struct ProfileResult: Decodable {
     let userLogin: String
     let firstName: String

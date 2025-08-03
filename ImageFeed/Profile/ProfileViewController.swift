@@ -72,6 +72,35 @@ final class ProfileViewController: UIViewController {
             self.updateAvatar()
         }
         updateAvatar()
+        
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+    }
+    
+   // MARK: - Actions
+    
+    @objc private func didTapLogoutButton() {
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Да", style: .destructive, handler: { _ in
+            ProfileLogoutService.shared.logout()
+            self.switchToSplashScreen()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Нет", style: .cancel, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    private func switchToSplashScreen() {
+        guard let window = UIApplication.shared.windows.first else { return }
+        
+        let splashVC = SplashViewController()
+        window.rootViewController = splashVC
+        window.makeKeyAndVisible()
     }
     
     // MARK: - Setup Methods
