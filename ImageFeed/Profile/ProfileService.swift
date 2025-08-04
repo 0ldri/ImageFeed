@@ -7,6 +7,12 @@ final class ProfileService {
     private(set) var profile: Profile?
     private var task: URLSessionTask?
     
+    func reset() {
+        profile = nil
+        task?.cancel()
+        task = nil
+    }
+    
     func fetchProfile(completion: @escaping (Result<Profile, Error>) -> Void) {
         guard let request = makeFetchProfileRequest() else {
             completion(.failure(NetworkError.urlRequestError(NSError(domain: "ProfileService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create URLRequest"])) ))

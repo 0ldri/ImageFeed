@@ -4,4 +4,6 @@ enum NetworkError: Error {
     case urlRequestError(Error)
     case urlSessionError
     case decodingError(Error)
+    case invalidURL
+    case tokenMissing
 }

@@ -55,6 +55,9 @@
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                     </userDefinedRuntimeAttributes>
+                                                    <connections>
+                                                        <action selector="likeButtonClicked" destination="Hcu-8w-zkU" eventType="touchUpInside" id="iqU-65-2Wh"/>
+                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>
