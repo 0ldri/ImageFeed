@@ -1,3 +1,6 @@
+import Kingfisher
+import UIKit
+import Foundation
 
 struct ProfileResult: Decodable {
     let userLogin: String
@@ -26,6 +29,20 @@ struct Profile {
     let name: String
     let loginName: String
     let bio: String?
+}
+
+struct AvatarImageParameters {
+    let url: URL
+    let placeholder: UIImage?
+    let processor: ImageProcessor?
+    let options: KingfisherOptionsInfo
+}
+
+struct LogoutAlertModel {
+    let title: String
+    let message: String
+    let confirmText: String
+    let cancelText: String
 }
 
 extension Profile {
