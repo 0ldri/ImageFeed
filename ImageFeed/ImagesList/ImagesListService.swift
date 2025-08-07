@@ -1,6 +1,6 @@
 import UIKit
 
-final class ImagesListService {
+final class ImagesListService: ImagesListServiceProtocol {
     static let shared = ImagesListService()
     private init() {}
     
@@ -19,7 +19,7 @@ final class ImagesListService {
         photos = []
     }
     
-    func fetchPhotosNextPage(completion: ((Result<[Photo], Error>) -> Void)? = nil) {
+    func fetchPhotosNextPage(completion: @escaping (Result<[Photo], Error>) -> Void) {
         guard !isFetching else { return }
         isFetching = true
         let nextPage = lastLoadedPage + 1
@@ -30,7 +30,7 @@ final class ImagesListService {
             baseURLString: baseURL
         ) else {
             isFetching = false
-            completion?(.failure(NetworkError.invalidURL))
+            completion(.failure(NetworkError.invalidURL))
             return
         }
         
@@ -44,17 +44,17 @@ final class ImagesListService {
                 
                 switch result {
                 case .success(let results):
-                    let newPhotos = results.map {Photo(from: $0) }
+                    let newPhotos = results.map { Photo(from: $0) }
                     self.photos.append(contentsOf: newPhotos)
                     self.lastLoadedPage = nextPage
                     NotificationCenter.default.post(
                         name: ImagesListService.didChangeNotification,
                         object: self
                     )
-                    completion?(.success(newPhotos))
+                    completion(.success(newPhotos))
                 case .failure(let error):
                     self.handleFailure(error)
-                    completion?(.failure(error))
+                    completion(.failure(error))
                 }
             }
         }

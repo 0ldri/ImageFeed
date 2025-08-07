@@ -1,13 +1,15 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
     
-    private var profileImageServiceObserver: NSObjectProtocol?
+    // MARK: - Properties
+    
+    var presenter: ProfilePresenterProtocol!
     
     // MARK: - UIElements
     
-    private let avatarImage: UIImageView = {
+    let avatarImage: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = UIImage(resource: .avatar)
@@ -15,7 +17,7 @@ final class ProfileViewController: UIViewController {
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    let nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Екатерина Новикова"
@@ -24,7 +26,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private let loginNameLabel: UILabel = {
+    let loginNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "@ekaterina_nov"
@@ -33,7 +35,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private let bioLabel: UILabel = {
+    let bioLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Hello, world!"
@@ -42,8 +44,8 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private let logoutButton: UIButton = {
-        let button = UIButton (type: .system)
+    let logoutButton: UIButton = {
+        let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         let image = UIImage(resource: .exitButton)
         button.tintColor = .ypRed
@@ -52,98 +54,77 @@ final class ProfileViewController: UIViewController {
     }()
     
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .ypBlack
-        addSubviews()
-        setupConstraints()
+        presenter = ProfilePresenter()
+        presenter.view = self
         
-        if let profile = ProfileService.shared.profile {
-            updateUI(with: profile)
-        }
-        
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self = self else { return }
-            self.updateAvatar()
-        }
-        updateAvatar()
-        
-        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+        setupView()
+        presenter.viewDidLoad()
     }
     
-   // MARK: - Actions
+    // MARK: - ProfileViewControllerProtocol
     
-    @objc private func didTapLogoutButton() {
-        let alert = UIAlertController(
-            title: "Пока, пока!",
-            message: "Уверены, что хотите выйти?",
-            preferredStyle: .alert
-        )
-
-        alert.addAction(UIAlertAction(title: "Да", style: .destructive, handler: { _ in
-            ProfileLogoutService.shared.logout()
-            self.switchToSplashScreen()
-        }))
-        
-        alert.addAction(UIAlertAction(title: "Нет", style: .cancel, handler: nil))
-        
-        present(alert, animated: true, completion: nil)
-    }
+    func updateProfileDetails(name: String, loginName: String, bio: String) {
+            nameLabel.text = name
+            loginNameLabel.text = loginName
+            bioLabel.text = bio
+        }
     
-    private func switchToSplashScreen() {
+    func updateAvatar(with parameters: AvatarImageParameters) {
+            avatarImage.kf.indicatorType = .activity
+            avatarImage.kf.setImage(
+                with: parameters.url,
+                placeholder: parameters.placeholder,
+                options: parameters.options
+            ) { result in
+                switch result {
+                case .success(let value): print("Image loaded: \(value.source)")
+                case .failure(let error): print("Error: \(error)")
+                }
+            }
+        }
+    
+    func showLogoutConfirmation(alertModel: LogoutAlertModel) {
+            let alert = UIAlertController(
+                title: alertModel.title,
+                message: alertModel.message,
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(
+                title: alertModel.confirmText,
+                style: .destructive,
+                handler: { [weak self] _ in self?.presenter.confirmLogout() }
+            ))
+            
+            alert.addAction(UIAlertAction(
+                title: alertModel.cancelText,
+                style: .cancel
+            ))
+            
+            present(alert, animated: true)
+        }
+    
+    func switchToSplashScreen() {
         guard let window = UIApplication.shared.windows.first else { return }
-        
         let splashVC = SplashViewController()
         window.rootViewController = splashVC
         window.makeKeyAndVisible()
     }
     
-    // MARK: - Setup Methods
+    // MARK: - Private Methods
     
-    private func updateUI(with profile: Profile) {
-        nameLabel.text = profile.name
-        loginNameLabel.text = profile.loginName
-        bioLabel.text = profile.bio
+    private func setupView() {
+        view.backgroundColor = .ypBlack
+        addSubviews()
+        setupConstraints()
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
     
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-        
-        print("imageUrl: \(url)")
-        
-        let placeholderImage = UIImage(systemName: "person.crop.circle.fill")?
-            .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
-            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 70, weight: .regular, scale: .large))
-        
-        let processor = RoundCornerImageProcessor(cornerRadius: 35)
-        avatarImage.kf.indicatorType = .activity
-        avatarImage.kf.setImage(
-            with: url,
-            placeholder: placeholderImage,
-            options: [
-                .processor(processor),
-                .scaleFactor(UIScreen.main.scale),
-                .cacheOriginalImage,
-                .forceRefresh
-            ]) { result in
-
-                switch result {
-                case .success(let value):
-                    print(value.image)
-                    print(value.cacheType)
-                    print(value.source)
-                case .failure(let error):
-                    print(error)
-                }
-            }
+    @objc private func didTapLogoutButton() {
+        presenter.didTapLogoutButton()
     }
     
     private func addSubviews() {
@@ -177,6 +158,6 @@ final class ProfileViewController: UIViewController {
             bioLabel.topAnchor.constraint(equalTo: loginNameLabel.bottomAnchor, constant: 8),
             bioLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             bioLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor)
-            ])
+        ])
     }
 }
